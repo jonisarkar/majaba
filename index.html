@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>মা জবা স্টুডিও - বিলিং অ্যাপ</title>
+    
+    <link rel="icon" href="favicon.ico"> 
+    
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        /* --- NEW COLOR SCHEME (BLUE) --- */
+        :root {
+            --primary-color: #2980B9; /* Deep Blue (Primary) */
+            --secondary-color: #1ABC9C; /* Turquoise/Cyan (Accent) */
+            --bg-color: #f4f6f8;
+            --text-color: #333;
+            --white: #ffffff;
+            --danger: #E74C3C;
+            --success: #2ECC71;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Hind Siliguri', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        /* হেডার */
+        header {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        header h1 { font-size: 1.8rem; font-weight: 700; color: var(--secondary-color); }
+        header p { font-size: 0.9rem; color: #fff; }
+
+        /* মেইন কন্টেইনার (ডেস্কটপ প্রস্থ) */
+        .container {
+            padding: 15px;
+            max-width: 1100px; /* Increased width for desktop */
+            margin: 0 auto;
+        }
+
+        /* কার্ড স্টাইল */
+        .card {
+            background: var(--white);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        /* ইনপুট ফিল্ড */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        input:focus { outline: none; border-color: var(--primary-color); }
+
+        /* বাটন */
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        .btn-primary { background: var(--primary-color); color: var(--white); width: 100%; }
+        .btn-secondary { background: var(--secondary-color); color: var(--white); width: 100%; }
+        .btn-danger { background: var(--danger); color: var(--white); width: 100%; }
+        .btn-warning { background: #f39c12; color: var(--white); width: 100%; }
+        .btn-sm { padding: 5px 10px; font-size: 0.8rem; width: auto; }
+
+        /* আইটেম টেবিল (বিল তৈরি) */
+        .item-row { display: grid; grid-template-columns: 4fr 1fr 1.5fr 0.5fr; gap: 10px; margin-bottom: 8px; }
+        .total-section { text-align: right; margin-top: 20px; border-top: 2px dashed #ddd; padding-top: 15px; }
+        .total-amount { font-size: 1.5rem; color: var(--primary-color); font-weight: bold; }
+
+        /* --- Top Tabs (Desktop Navigation) --- */
+        .top-tabs-wrapper {
+            background: var(--white);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+        .top-tabs {
+            display: flex;
+            overflow: hidden;
+        }
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            padding: 12px 0;
+            cursor: pointer;
+            color: var(--text-color);
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        .nav-item:hover {
+            background-color: #f0f0f0;
+        }
+        .nav-item.active {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+            background-color: #eaf3f9; /* Light background for active tab */
+        }
+        .nav-item i { font-size: 1rem; }
+        .nav-item span { font-size: 0.9rem; }
+        /* --- END: Top Tabs --- */
+
+        /* পেজ ভিউ কন্ট্রোল */
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+
+        /* ইনভয়েস এবং লিস্ট স্টাইল */
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.1s;
+        }
+        .list-item:hover { background-color: #f9f9f9; }
+        
+        .status-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        .status-paid { background: #d4edda; color: #155724; }
+        .status-due { background: #f8d7da; color: #721c24; }
+
+        /* অ্যানিমেশন */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* PDF টেম্পলেট (লুকানো) */
+        #pdf-template {
+            display: none; 
+            width: 100%;
+            background: white;
+            padding: 20px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>মা জবা স্টুডিও</h1>
+        <p>প্রোপাইটর: জনি সরকার</p>
+        <p>ঠিকানা: হাজী আঃ রহমান সুপার মার্কেট, নিমসার, বুড়িচং, কুমিল্লা।</p>
+        <p><i class="fas fa-phone"></i> ০১৮৬৪৯৬৯১৩৮</p>
+    </header>
+
+    <div class="top-tabs-wrapper">
+        <div class="container">
+            <div class="top-tabs">
+                <div class="nav-item active" onclick="switchView('home-view', this)">
+                    <i class="fas fa-calculator"></i>
+                    <span>বিল তৈরি</span>
+                </div>
+                <div class="nav-item" onclick="switchView('invoices-view', this)">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <span>ইনভয়েস</span>
+                </div>
+                <div class="nav-item" onclick="switchView('customers-view', this)">
+                    <i class="fas fa-users"></i>
+                    <span>গ্রাহক</span>
+                </div>
+                <div class="nav-item" onclick="switchView('reports-view', this)">
+                    <i class="fas fa-chart-line"></i>
+                    <span>রিপোর্ট</span>
+                </div>
+                <div class="nav-item" onclick="switchView('settings-view', this)">
+                    <i class="fas fa-cog"></i>
+                    <span>সেটিংস</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        
+        <div id="home-view" class="view-section active">
+            <div class="card">
+                <h3><i class="fas fa-file-invoice"></i> বিল তৈরি/এডিট করুন</h3>
+                <hr style="margin: 10px 0;">
+                
+                <div class="form-group">
+                    <label>ইনভয়েস নং:</label>
+                    <input type="text" id="invoiceNo" readonly style="background: #eee;">
+                </div>
+                
+                <div class="form-group">
+                    <label>গ্রাহকের নাম:</label>
+                    <input type="text" id="customerName" placeholder="নাম লিখুন" list="customerList">
+                    <datalist id="customerList"></datalist>
+                </div>
+                
+                <div class="form-group">
+                    <label>মোবাইল:</label>
+                    <input type="tel" id="customerMobile" placeholder="01XXX...">
+                </div>
+
+                <div class="form-group">
+                    <label>ঠিকানা:</label>
+                    <input type="text" id="customerAddress" placeholder="গ্রাহকের ঠিকানা লিখুন">
+                </div>
+                
+                <div class="form-group">
+                    <label>পণ্যসমূহ:</label>
+                    <div id="items-container">
+                        </div>
+                    <button class="btn btn-secondary btn-sm" onclick="addNewItemRow()" style="margin-top: 5px; width: auto;">
+                        <i class="fas fa-plus"></i> আরো পণ্য যোগ করুন
+                    </button>
+                </div>
+
+                <div class="total-section">
+                    <p>সর্বমোট: <span id="grandTotal">0</span> টাকা</p>
+                    <p>জমা: <input type="number" id="paidAmount" value="0" style="width: 100px; text-align: right;" oninput="calculateCalculations()"> টাকা</p>
+                    <p style="color: var(--danger);">বকেয়া: <span id="dueAmount">0</span> টাকা</p>
+                </div>
+
+                <button class="btn btn-primary" onclick="saveInvoice()" style="margin-top: 15px;">
+                    <i class="fas fa-save"></i> বিল সেভ করুন ও প্রিন্ট দিন
+                </button>
+            </div>
+        </div>
+
+        <div id="invoices-view" class="view-section">
+            <div class="card">
+                <h3>সকল ইনভয়েস</h3>
+                <div id="invoice-list-container"></div>
+            </div>
+        </div>
+
+        <div id="customers-view" class="view-section">
+            <div class="card">
+                <h3>গ্রাহক ব্যবস্থাপনা</h3>
+                <div id="customer-list-container"></div>
+            </div>
+        </div>
+
+        <div id="reports-view" class="view-section">
+            <div class="card">
+                <h3>ব্যবসায়িক রিপোর্ট</h3>
+                
+                <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center;">
+                    <select id="reportYearSelect" onchange="renderReports()" style="flex: 1;"></select>
+                    <select id="reportMonthSelect" onchange="renderReports()" style="flex: 1;"></select>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--primary-color); font-weight: 600; margin-bottom: 10px;">
+                    <span id="report-period-text">সম্পূর্ণ সময়ের রিপোর্ট</span>
+                </p>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+                    <div style="background: #eaf3f9; padding: 10px; border-radius: 5px; text-align: center;">
+                        <h4 style="color: var(--primary-color); font-size: 0.9rem;">মোট বিক্রয় (৳)</h4>
+                        <h2 id="total-sales-report" style="font-size: 1.4rem;">0</h2>
+                    </div>
+                    <div style="background: #e4f9f7; padding: 10px; border-radius: 5px; text-align: center;">
+                        <h4 style="color: var(--secondary-color); font-size: 0.9rem;">মোট পরিশোধ (৳)</h4>
+                        <h2 id="total-paid-report" style="font-size: 1.4rem;">0</h2>
+                    </div>
+                    <div style="background: #fbe6e6; padding: 10px; border-radius: 5px; text-align: center;">
+                        <h4 style="color: var(--danger); font-size: 0.9rem;">মোট বকেয়া (৳)</h4>
+                        <h2 id="total-due-report" style="font-size: 1.4rem;">0</h2>
+                    </div>
+                    <div style="background: #e3f2fd; padding: 10px; border-radius: 5px; text-align: center;">
+                        <h4 style="color: #2196f3; font-size: 0.9rem;">মোট ইনভয়েস</h4>
+                        <h2 id="total-invoices-report" style="font-size: 1.4rem;">0</h2>
+                    </div>
+                </div>
+
+                <h4 style="margin-top: 25px; border-top: 1px solid #ddd; padding-top: 15px;">
+                    <i class="fas fa-users"></i> গ্রাহকভিত্তিক রিপোর্ট (<span id="client-report-period-name">সম্পূর্ণ সময়</span>)
+                </h4>
+                <div id="client-report-container" style="margin-top: 10px;">
+                    <p style="color:#777;">মাস বা বছর সিলেক্ট করলে গ্রাহকভিত্তিক রিপোর্ট দেখাবে।</p>
+                </div>
+                <h4 style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 15px;">শীর্ষ গ্রাহকগণ (সর্বমোট বকেয়া)</h4>
+                <ul id="top-customers-list" style="list-style: none; margin-top: 10px;"></ul>
+            </div>
+        </div>
+        
+        <div id="settings-view" class="view-section">
+            <div class="card">
+                <h3><i class="fas fa-cog"></i> অ্যাপ সেটিংস ও ডেটা</h3>
+                <hr style="margin: 10px 0;">
+
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="font-size: 1.1rem; color: var(--primary-color);">ব্যাকআপ ডেটা 📥</label>
+                    <p style="font-size: 0.85rem; color: #666; margin-bottom: 10px;">আপনার সমস্ত বিল ও গ্রাহকের তথ্য একটি JSON ফাইলে সেভ করুন।</p>
+                    <button class="btn btn-primary" onclick="exportBackupData()">
+                        <i class="fas fa-download"></i> ডাউনলোড করুন
+                    </button>
+                </div>
+                
+                <hr style="margin: 20px 0;">
+                
+                <div class="form-group">
+                    <label style="font-size: 1.1rem; color: var(--danger);">ডেটা রিস্টোর করুন 📤</label>
+                    <p style="font-size: 0.85rem; color: #e74c3c; margin-bottom: 10px;">**সতর্কতা:** ফাইল আপলোড করলে ডিভাইসের বর্তমান সকল ডেটা মুছে যাবে এবং নতুন ডেটা দ্বারা প্রতিস্থাপিত হবে।</p>
+                    
+                    <input type="file" id="restoreFile" accept=".json" style="padding: 5px; margin-bottom: 10px;">
+                    <button class="btn btn-danger" onclick="importBackupData()">
+                        <i class="fas fa-upload"></i> ডেটা রিস্টোর করুন
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <div id="pdf-container" style="display: none;">
+        <div id="invoice-template" style="padding: 20px; font-family: 'Hind Siliguri', sans-serif; background: #fff; width: 100%; max-width: 800px;">
+            <div style="text-align: center; border-bottom: 2px solid #2980B9; padding-bottom: 10px; margin-bottom: 20px;">
+                <h1 style="color: #2980B9; margin: 0; font-size: 28px;">মা জবা স্টুডিও</h1>
+                <p style="margin: 5px 0;">প্রোপাইটর: জনি সরকার</p>
+                <p style="margin: 5px 0;">ঠিকানা: হাজী আঃ রহমান সুপার মার্কেট, নিমসার, বুড়িচং, কুমিল্লা।</p>
+                <p style="margin: 0;"><b>মোবাইল: ০১৮৬৪৯৬৯১৩৮</b></p>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                <div>
+                    <p><b>গ্রাহকের নাম:</b> <span id="pdf-cust-name"></span></p>
+                    <p><b>মোবাইল:</b> <span id="pdf-cust-mobile"></span></p>
+                    <p><b>ঠিকানা:</b> <span id="pdf-cust-address"></span></p>
+                </div>
+                <div style="text-align: right;">
+                    <p><b>ইনভয়েস নং:</b> <span id="pdf-inv-no"></span></p>
+                    <p><b>তারিখ:</b> <span id="pdf-date"></span></p>
+                </div>
+            </div>
+
+            <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
+                <thead>
+                    <tr style="background: #2980B9; color: #fff;">
+                        <th style="padding: 8px; border: 1px solid #ddd;">বিবরণ</th>
+                        <th style="padding: 8px; border: 1px solid #ddd; text-align: center;">পরিমাণ</th>
+                        <th style="padding: 8px; border: 1px solid #ddd; text-align: right;">দর</th>
+                        <th style="padding: 8px; border: 1px solid #ddd; text-align: right;">মোট</th>
+                    </tr>
+                </thead>
+                <tbody id="pdf-items-body"></tbody>
+            </table>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+                <table style="width: 250px;">
+                    <tr>
+                        <td style="text-align: right; padding: 5px;"><b>মোট বিল:</b></td>
+                        <td style="text-align: right; padding: 5px;" id="pdf-total"></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: right; padding: 5px;"><b>জমা:</b></td>
+                        <td style="text-align: right; padding: 5px;" id="pdf-paid"></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: right; padding: 5px; color: #e74c3c;"><b>বকেয়া:</b></td>
+                        <td style="text-align: right; padding: 5px; color: #e74c3c;" id="pdf-due"></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div style="margin-top: 50px; display: flex; justify-content: space-between;">
+                <div style="text-align: center; width: 150px; border-top: 1px solid #333; padding-top: 5px;">
+                    গ্রাহকের স্বাক্ষর
+                </div>
+                <div style="text-align: center; width: 150px; border-top: 1px solid #333; padding-top: 5px;">
+                    কর্তৃপক্ষের স্বাক্ষর
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 30px; font-size: 10px; color: #777;">
+                সফটওয়্যার সল্যুশন
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- ডেটাবেস এবং ভেরিয়েবল ---
+        let db = {
+            invoices: JSON.parse(localStorage.getItem('joba_invoices')) || [], /* Key set to joba_ */
+            customers: JSON.parse(localStorage.getItem('joba_customers')) || [], /* Key set to joba_ */
+            reports: JSON.parse(localStorage.getItem('joba_reports')) || {} /* Key set to joba_ */
+        };
+        
+        // --- গ্লোবাল ভেরিয়েবল (এডিট স্টেট) ---
+        let currentEditingInvoiceId = null; 
+        
+        // মাসের নাম
+        const MONTH_NAMES = [
+            'সম্পূর্ণ বছর', 'জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন',
+            'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'
+        ];
+
+
+        // --- ইনিশিয়ালাইজেশন ---
+        document.addEventListener('DOMContentLoaded', () => {
+            generateInvoiceID();
+            addNewItemRow(); // প্রথম সারি যোগ করা
+            loadCustomerDatalist();
+            initializeReportPickers(); // রিপোর্ট পিকার ইনিশিয়ালাইজ করা
+            renderReports(); // প্রাথমিক রিপোর্ট লোড
+        });
+
+        // --- ন্যাভিগেশন ---
+        function switchView(viewId, element) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+
+            // ভিউ অনুযায়ী ডেটা রিফ্রেশ
+            if(viewId === 'invoices-view') renderInvoiceList();
+            if(viewId === 'customers-view') renderCustomerList();
+            if(viewId === 'reports-view') renderReports(); // রিপোর্ট ভিউতে গেলে ডেটা রিফ্রেশ
+        }
+
+        // --- বিল তৈরি/এডিট লজিক ---
+        function generateInvoiceID() {
+            const today = new Date();
+            const dateStr = today.toISOString().slice(0,10).replace(/-/g,'');
+            const count = db.invoices.filter(inv => inv.date === today.toISOString().slice(0,10)).length + 1;
+            const id = `MJS-${dateStr}-${String(count).padStart(3, '0')}`; /* ID prefix set to MJS- */
+            document.getElementById('invoiceNo').value = id;
+        }
+
+        function addNewItemRow() {
+            const container = document.getElementById('items-container');
+            const div = document.createElement('div');
+            div.className = 'item-row';
+            div.innerHTML = `
+                <input type="text" placeholder="পণ্যের নাম/বিবরণ" class="item-name">
+                <input type="number" placeholder="Qty" class="item-qty" oninput="calculateCalculations()" value="1">
+                <input type="number" placeholder="দাম" class="item-price" oninput="calculateCalculations()">
+                <button class="btn btn-danger btn-sm" onclick="this.parentElement.remove(); calculateCalculations()">X</button>
+            `;
+            container.appendChild(div);
+        }
+
+        function calculateCalculations() {
+            let total = 0;
+            const rows = document.querySelectorAll('.item-row');
+            
+            rows.forEach(row => {
+                const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
+                const price = parseFloat(row.querySelector('.item-price').value) || 0;
+                total += (qty * price);
+            });
+
+            document.getElementById('grandTotal').innerText = total;
+            
+            const paid = parseFloat(document.getElementById('paidAmount').value) || 0;
+            const due = total - paid;
+            document.getElementById('dueAmount').innerText = due;
+            return { total, paid, due };
+        }
+        
+        // হেল্পার ফাংশন: ফর্ম থেকে ডেটা সংগ্রহ করা
+        function collectInvoiceData() {
+            const customerName = document.getElementById('customerName').value;
+            const customerMobile = document.getElementById('customerMobile').value;
+            const customerAddress = document.getElementById('customerAddress').value; // গ্রাহকের ঠিকানা
+            const invoiceId = document.getElementById('invoiceNo').value;
+            
+            if(!customerName) { alert('দয়া করে গ্রাহকের নাম দিন'); return null; }
+        
+            const rows = document.querySelectorAll('.item-row');
+            let items = [];
+            rows.forEach(row => {
+                const name = row.querySelector('.item-name').value;
+                const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
+                const price = parseFloat(row.querySelector('.item-price').value) || 0;
+                if(name && (qty > 0 || price > 0)) {
+                    items.push({ name, qty, price, total: qty * price });
+                }
+            });
+        
+            if(items.length === 0) { alert('কমপক্ষে একটি পণ্য যোগ করুন'); return null; }
+        
+            const calcs = calculateCalculations();
+            const invoice = {
+                id: invoiceId,
+                date: new Date().toISOString().slice(0,10), 
+                customerName,
+                customerMobile,
+                customerAddress, // ডেটা সেভ করা
+                items,
+                total: calcs.total,
+                paid: calcs.paid,
+                due: calcs.due
+            };
+            return invoice;
+        }
+
+
+        // নতুন বিল সেভ করার ফাংশন
+        function saveInvoice() {
+            const invoice = collectInvoiceData();
+            if (!invoice) return;
+
+            // সেভ ডেটা
+            db.invoices.unshift(invoice);
+            updateCustomerDue(invoice.customerName, invoice.customerMobile, invoice.due);
+            updateReports(invoice.date, invoice.total, invoice.paid, invoice.due, true); // রিপোর্ট যোগ করা
+            saveToLocalStorage();
+
+            // PDF জেনারেট
+            generatePDF(invoice);
+
+            alert('বিল সফলভাবে তৈরি হয়েছে!');
+            location.reload(); // পেজ রিফ্রেশ করে নতুন বিলের জন্য প্রস্তুত
+        }
+
+        // এডিট ইনভয়েস ফাংশন (ফর্ম লোড করা)
+        function editInvoice(invoiceId) {
+            const invoice = db.invoices.find(i => i.id === invoiceId);
+            if (!invoice) {
+                alert('ইনভয়েসটি খুঁজে পাওয়া যায়নি।');
+                return;
+            }
+
+            // স্টেট সেট করা
+            currentEditingInvoiceId = invoiceId;
+
+            // ১. Home View-তে যাওয়া
+            switchView('home-view', document.querySelector('.nav-item[onclick*="\'home-view\'"]'));
+
+            // ২. ফর্ম পূরণ করা
+            document.getElementById('invoiceNo').value = invoice.id; 
+            document.getElementById('customerName').value = invoice.customerName;
+            document.getElementById('customerMobile').value = invoice.customerMobile;
+            document.getElementById('customerAddress').value = invoice.customerAddress || ''; // ঠিকানা লোড করা
+            
+            // ৩. পণ্যসমূহ লোড করা
+            const itemsContainer = document.getElementById('items-container');
+            itemsContainer.innerHTML = ''; 
+
+            invoice.items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'item-row';
+                div.innerHTML = `
+                    <input type="text" placeholder="পণ্যের নাম/বিবরণ" class="item-name" value="${item.name || ''}">
+                    <input type="number" placeholder="Qty" class="item-qty" oninput="calculateCalculations()" value="${item.qty || 0}">
+                    <input type="number" placeholder="দাম" class="item-price" oninput="calculateCalculations()" value="${item.price || 0}">
+                    <button class="btn btn-danger btn-sm" onclick="this.parentElement.remove(); calculateCalculations()">X</button>
+                `;
+                itemsContainer.appendChild(div);
+            });
+
+            if (invoice.items.length === 0) {
+                addNewItemRow();
+            }
+
+            // ৪. মোট ও জমা পূরণ করা
+            document.getElementById('paidAmount').value = invoice.paid;
+            calculateCalculations(); 
+
+            // ৫. Save বাটনকে Update বাটনে পরিবর্তন করা
+            const saveButton = document.querySelector('#home-view button[onclick*="saveInvoice"]');
+            saveButton.innerHTML = '<i class="fas fa-edit"></i> ইনভয়েস আপডেট করুন';
+            saveButton.setAttribute('onclick', 'updateInvoice()'); 
+            saveButton.classList.remove('btn-primary');
+            saveButton.classList.add('btn-warning');
+        }
+
+        // ইনভয়েস আপডেট ফাংশন
+        function updateInvoice() {
+            if (!currentEditingInvoiceId) {
+                alert('আপডেট করার জন্য কোনো ইনভয়েস আইডি পাওয়া যায়নি।');
+                return;
+            }
+
+            const newInvoice = collectInvoiceData(); 
+            if (!newInvoice) return; 
+
+            const oldInvoiceIndex = db.invoices.findIndex(i => i.id === currentEditingInvoiceId);
+            if (oldInvoiceIndex === -1) {
+                alert('পুরোনো ইনভয়েসটি ডেটাবেসে খুঁজে পাওয়া যায়নি। আপডেট সম্ভব না।');
+                return;
+            }
+            const oldInvoice = db.invoices[oldInvoiceIndex];
+            
+            // ১. রিপোর্ট থেকে পুরোনো ইনভয়েসের হিসাব রিভার্স করা
+            updateReports(oldInvoice.date, oldInvoice.total, oldInvoice.paid, oldInvoice.due, false); 
+
+            // ২. গ্রাহকের মোট বকেয়া (totalDue) ঠিক করা
+            const oldDue = oldInvoice.due;
+            const newDue = newInvoice.due;
+            
+            let customer = db.customers.find(c => c.mobile === newInvoice.customerMobile);
+            
+            if (customer) {
+                // পুরোনো বকেয়া বাদ দেওয়া
+                customer.totalDue = (customer.totalDue || 0) - oldDue;
+                // নতুন বকেয়া যোগ করা
+                customer.totalDue = (customer.totalDue || 0) + newDue;
+                customer.totalDue = Math.max(0, customer.totalDue); 
+                customer.lastVisit = new Date().toISOString().slice(0,10);
+            } else {
+                // যদি আপডেটের ফলে গ্রাহকের মোবাইল নম্বর পরিবর্তন হয় এবং নতুন নম্বরটি না থাকে
+                db.customers.push({
+                    name: newInvoice.customerName, mobile: newInvoice.customerMobile, totalDue: newDue, lastVisit: new Date().toISOString().slice(0,10)
+                });
+            }
+
+            // ৩. ইনভয়েস ডেটাবেসে প্রতিস্থাপন করা
+            db.invoices[oldInvoiceIndex] = newInvoice;
+            
+            // ৪. রিপোর্টে নতুন ইনভয়েসের হিসাব যোগ করা
+            updateReports(newInvoice.date, newInvoice.total, newInvoice.paid, newInvoice.due, true); 
+
+            saveToLocalStorage();
+
+            alert(`ইনভয়েস ${currentEditingInvoiceId} সফলভাবে আপডেট হয়েছে!`);
+            
+            // ৫. আপডেট হওয়া ডেটা দিয়ে প্রিন্ট ভিউ আপডেট করা (পিডিএফ ডাউনলোড)
+            generatePDF(newInvoice); 
+
+            // ৬. পেজ রিলোড করে স্টেট রিসেট করা
+            location.reload(); 
+        }
+
+        // --- ফাংশন: ইনভয়েস ডিলিট করা ---
+        function deleteInvoice(invoiceId) {
+            if (!confirm('আপনি কি নিশ্চিত? এই ইনভয়েসটি স্থায়ীভাবে মুছে যাবে এবং গ্রাহকের বকেয়া আপডেট হবে।')) {
+                return;
+            }
+
+            const invoiceIndex = db.invoices.findIndex(i => i.id === invoiceId);
+            if (invoiceIndex === -1) {
+                alert('ইনভয়েসটি খুঁজে পাওয়া যায়নি।');
+                return;
+            }
+
+            const deletedInvoice = db.invoices[invoiceIndex];
+            const dueAmount = deletedInvoice.due;
+            const customerMobile = deletedInvoice.customerMobile;
+            
+            // ১. রিপোর্ট থেকে ইনভয়েসের হিসাব রিভার্স করা
+            updateReports(deletedInvoice.date, deletedInvoice.total, deletedInvoice.paid, deletedInvoice.due, false); 
+
+            // ২. গ্রাহকের বকেয়া থেকে এই ইনভয়েসের বকেয়া বাদ দেওয়া
+            let customer = db.customers.find(c => c.mobile === customerMobile);
+            if (customer) {
+                customer.totalDue = Math.max(0, (customer.totalDue || 0) - dueAmount);
+            }
+
+            // ৩. ইনভয়েস ডেটাবেস থেকে মুছে ফেলা
+            db.invoices.splice(invoiceIndex, 1);
+            
+            // ৪. লোকাল স্টোরেজে সেভ করা
+            saveToLocalStorage();
+            
+            // ৫. UI রিফ্রেশ
+            renderInvoiceList();
+            renderReports();
+            alert(`ইনভয়েস ${invoiceId} সফলভাবে মুছে ফেলা হয়েছে এবং বকেয়া আপডেট করা হয়েছে।`);
+        }
+        // --- ইনভয়েস ডিলিট ফাংশন শেষ ---
+        
+        // --- মাসিক ও বার্ষিক রিপোর্ট আপডেট ফাংশন ---
+        function updateReports(dateStr, total, paid, due, isAdd) {
+            // dateStr format is 'YYYY-MM-DD'
+            const year = dateStr.substring(0, 4);
+            const month = dateStr.substring(5, 7); // MM
+            
+            // বছর এবং মাসের এন্ট্রি নিশ্চিত করা
+            if (!db.reports[year]) db.reports[year] = {};
+            if (!db.reports[year][month]) {
+                db.reports[year][month] = { totalSales: 0, totalDue: 0, totalPaid: 0, totalInvoices: 0 };
+            }
+            
+            // অপারেশন নির্ধারণ করা: যোগ করা (1) বা রিভার্স করা (-1)
+            const multiplier = isAdd ? 1 : -1;
+            
+            // মাসিক রিপোর্ট আপডেট করা
+            db.reports[year][month].totalSales += total * multiplier;
+            db.reports[year][month].totalDue += due * multiplier;
+            db.reports[year][month].totalPaid += paid * multiplier;
+            db.reports[year][month].totalInvoices += multiplier;
+
+            // নেগেটিভ ভ্যালু এড়ানো (বিশেষ করে ডিলিট করার পর)
+            db.reports[year][month].totalSales = Math.max(0, db.reports[year][month].totalSales);
+            db.reports[year][month].totalDue = Math.max(0, db.reports[year][month].totalDue);
+            db.reports[year][month].totalPaid = Math.max(0, db.reports[year][month].totalPaid);
+            db.reports[year][month].totalInvoices = Math.max(0, db.reports[year][month].totalInvoices);
+
+            // saveToLocalStorage() অন্য ফাংশন থেকে কল করা হবে
+        }
+        // --- রিপোর্ট আপডেট ফাংশন শেষ ---
+
+
+        // --- গ্রাহক ডিলিট করা ---
+        function deleteCustomer(mobile) {
+            if (!confirm('আপনি কি নিশ্চিত? এই গ্রাহককে স্থায়ীভাবে মুছে ফেলা হবে। যদি এই গ্রাহকের নামে কোনো ইনভয়েস থাকে, তবে ডিলিট করা সম্ভব হবে না।')) {
+                return;
+            }
+
+            const customerIndex = db.customers.findIndex(c => c.mobile === mobile);
+            if (customerIndex === -1) {
+                alert('গ্রাহক খুঁজে পাওয়া যায়নি।');
+                return;
+            }
+
+            // চেক করা যে গ্রাহকের নামে কোনো ইনভয়েস আছে কি না
+            const hasInvoices = db.invoices.some(inv => inv.customerMobile === mobile);
+            if (hasInvoices) {
+                alert('এই গ্রাহকের নামে এখনও বিল রয়েছে। ডেটার অসামঞ্জস্যতা এড়াতে, দয়া করে আগে বিলগুলো মুছে ফেলুন, তারপর গ্রাহককে ডিলিট করুন।');
+                return;
+            }
+            
+            // গ্রাহক মুছে ফেলা
+            db.customers.splice(customerIndex, 1);
+            
+            saveToLocalStorage();
+            
+            // UI Refresh
+            renderCustomerList();
+            renderReports();
+            loadCustomerDatalist();
+            alert('গ্রাহক সফলভাবে মুছে ফেলা হয়েছে।');
+        }
+        // --- গ্রাহক ডিলিট ফাংশন শেষ ---
+
+
+        function updateCustomerDue(name, mobile, dueAmount) {
+            let customer = db.customers.find(c => c.mobile === mobile);
+            if (customer) {
+                customer.totalDue = (customer.totalDue || 0) + dueAmount;
+                customer.lastVisit = new Date().toISOString().slice(0,10);
+            } else {
+                db.customers.push({
+                    name, mobile, totalDue: dueAmount, lastVisit: new Date().toISOString().slice(0,10)
+                });
+            }
+        }
+
+        function loadCustomerDatalist() {
+            const list = document.getElementById('customerList');
+            list.innerHTML = '';
+            db.customers.forEach(c => {
+                const option = document.createElement('option');
+                option.value = c.name;
+                list.appendChild(option);
+            });
+            
+            // অটো মোবাইল ফিল
+            document.getElementById('customerName').addEventListener('change', function() {
+                const cust = db.customers.find(c => c.name === this.value);
+                if(cust) document.getElementById('customerMobile').value = cust.mobile;
+            });
+        }
+
+        // --- PDF জেনারেশন ---
+        function generatePDF(invoice) {
+            document.getElementById('pdf-cust-name').innerText = invoice.customerName;
+            document.getElementById('pdf-cust-mobile').innerText = invoice.customerMobile;
+            document.getElementById('pdf-cust-address').innerText = invoice.customerAddress || 'N/A';
+            document.getElementById('pdf-inv-no').innerText = invoice.id;
+            document.getElementById('pdf-date').innerText = invoice.date;
+
+            const tbody = document.getElementById('pdf-items-body');
+            tbody.innerHTML = '';
+            invoice.items.forEach(item => {
+                const itemTotal = parseFloat(item.qty) * parseFloat(item.price);
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd;">${item.name}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align:center">${item.qty}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align:right">${item.price}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align:right">${itemTotal}</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('pdf-total').innerText = invoice.total + '/-';
+            document.getElementById('pdf-paid').innerText = invoice.paid + '/-';
+            document.getElementById('pdf-due').innerText = invoice.due + '/-';
+
+            const element = document.getElementById('invoice-template');
+            const opt = {
+                margin: 0.5,
+                filename: `Bill_${invoice.id}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+
+            document.getElementById('pdf-container').style.display = 'block';
+            html2pdf().set(opt).from(element).save().then(() => {
+                document.getElementById('pdf-container').style.display = 'none';
+            });
+        }
+
+        // --- ইনভয়েস লিস্ট ---
+        function renderInvoiceList() {
+            const container = document.getElementById('invoice-list-container');
+            container.innerHTML = '';
+            
+            db.invoices.forEach(inv => {
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                div.innerHTML = `
+                    <div>
+                        <div style="font-weight:bold">${inv.customerName}</div>
+                        <div style="font-size:0.8rem; color:#666">${inv.id} | ${inv.date}</div>
+                    </div>
+                    <div style="text-align:right">
+                        <div style="font-weight:bold">${inv.total} টাকা</div>
+                        <span class="status-badge ${inv.due > 0 ? 'status-due' : 'status-paid'}">
+                            ${inv.due > 0 ? 'বকেয়া: ' + inv.due : 'পরিশোধিত'}
+                        </span>
+                        
+                        <div style="margin-top: 5px;">
+                            <button class="btn-sm btn-danger" style="margin-right: 5px;" onclick='deleteInvoice("${inv.id}")'>
+                               <i class="fas fa-trash-alt"></i>
+                            </button>
+                            <button class="btn-sm btn-primary" style="margin-right: 5px;" onclick='rePrintInvoice("${inv.id}")'>
+                               <i class="fas fa-print"></i>
+                            </button>
+                            <button class="btn-sm btn-secondary" onclick='editInvoice("${inv.id}")'>
+                               <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function rePrintInvoice(id) {
+            const inv = db.invoices.find(i => i.id === id);
+            if(inv) generatePDF(inv);
+        }
+
+        // --- গ্রাহক তালিকা ---
+        function renderCustomerList() {
+            const container = document.getElementById('customer-list-container');
+            container.innerHTML = '';
+            
+            db.customers.forEach(cust => {
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                div.innerHTML = `
+                    <div>
+                        <div style="font-weight:bold">${cust.name}</div>
+                        <div style="font-size:0.8rem; color:#666">${cust.mobile}</div>
+                    </div>
+                    <div style="text-align:right">
+                        <div style="color: var(--danger); font-weight:bold; margin-bottom: 5px;">বকেয়া: ${cust.totalDue}</div>
+                        <button class="btn-sm btn-danger" onclick='deleteCustomer("${cust.mobile}")'>
+                            <i class="fas fa-trash-alt"></i> ডিলিট
+                        </button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+        
+        // --- রিপোর্ট পিকার ইনিশিয়ালাইজেশন ---
+        function initializeReportPickers() {
+            const yearSelect = document.getElementById('reportYearSelect');
+            const monthSelect = document.getElementById('reportMonthSelect');
+            const currentYear = new Date().getFullYear();
+            
+            // Year Picker (Go back 5 years or until first invoice year)
+            yearSelect.innerHTML = `<option value="">সম্পূর্ণ সময়</option>`;
+            
+            const uniqueYears = new Set();
+            db.invoices.forEach(inv => uniqueYears.add(parseInt(inv.date.substring(0, 4))));
+
+            let startYear = currentYear;
+            if (uniqueYears.size > 0) {
+                startYear = Math.min(...Array.from(uniqueYears), currentYear);
+            }
+            
+            for (let y = currentYear; y >= startYear; y--) {
+                yearSelect.innerHTML += `<option value="${y}">${y}</option>`;
+            }
+            
+            // Month Picker
+            monthSelect.innerHTML = '';
+            MONTH_NAMES.forEach((name, index) => {
+                if (index === 0) {
+                    monthSelect.innerHTML += `<option value="">${name}</option>`;
+                } else {
+                    const monthValue = String(index).padStart(2, '0');
+                    monthSelect.innerHTML += `<option value="${monthValue}">${name}</option>`;
+                }
+            });
+
+            // Set default selection to the current month/year
+            yearSelect.value = currentYear;
+            monthSelect.value = String(new Date().getMonth() + 1).padStart(2, '0');
+        }
+
+        // --- রিপোর্টস (আপডেট করা হয়েছে) ---
+        function renderReports() {
+            const yearSelect = document.getElementById('reportYearSelect').value;
+            const monthSelect = document.getElementById('reportMonthSelect').value;
+            const periodText = document.getElementById('report-period-text');
+            const clientReportContainer = document.getElementById('client-report-container');
+            const clientReportPeriodName = document.getElementById('client-report-period-name');
+
+
+            let totalSales = 0;
+            let totalDue = 0;
+            let totalPaid = 0;
+            let totalInvoices = 0;
+            let periodName = 'সম্পূর্ণ সময়ের রিপোর্ট';
+            
+            // ------------------------------------
+            // ১. ইনভয়েস ফিল্টার করা ও সারাংশ গণনা করা
+            // ------------------------------------
+            
+            let filteredInvoices = db.invoices.filter(inv => {
+                const invYear = inv.date.substring(0, 4);
+                const invMonth = inv.date.substring(5, 7);
+                
+                let matchYear = (yearSelect === "" || invYear === yearSelect);
+                let matchMonth = (monthSelect === "" || invMonth === monthSelect);
+                
+                return matchYear && matchMonth;
+            });
+            
+            if (yearSelect === "" && monthSelect === "") {
+                // সম্পূর্ণ সময়ের হিসাব (পুরোনো লজিক)
+                filteredInvoices.forEach(inv => {
+                    totalSales += parseFloat(inv.total);
+                    totalDue += parseFloat(inv.due);
+                    totalPaid += parseFloat(inv.paid);
+                    totalInvoices += 1;
+                });
+                periodName = 'সম্পূর্ণ সময়ের রিপোর্ট';
+                
+            } else if (yearSelect !== "" && monthSelect === "") {
+                // নির্দিষ্ট বছরের রিপোর্ট (Report DB থেকে)
+                const yearData = db.reports[yearSelect] || {};
+                periodName = `${yearSelect} সালের রিপোর্ট`;
+                
+                for (const monthKey in yearData) {
+                    totalSales += yearData[monthKey].totalSales;
+                    totalDue += yearData[monthKey].totalDue;
+                    totalPaid += yearData[monthKey].totalPaid;
+                    totalInvoices += yearData[monthKey].totalInvoices;
+                }
+
+            } else if (yearSelect !== "" && monthSelect !== "") {
+                // নির্দিষ্ট মাসের রিপোর্ট (Report DB থেকে)
+                const monthData = db.reports[yearSelect] ? db.reports[yearSelect][monthSelect] : null;
+                periodName = `${MONTH_NAMES[parseInt(monthSelect)]} ${yearSelect} সালের রিপোর্ট`;
+
+                if (monthData) {
+                    totalSales = monthData.totalSales;
+                    totalDue = monthData.totalDue;
+                    totalPaid = monthData.totalPaid;
+                    totalInvoices = monthData.totalInvoices;
+                }
+            }
+            
+            // --- ২. সারাংশ UI-তে প্রদর্শন করা ---
+            periodText.innerText = periodName;
+            document.getElementById('total-sales-report').innerText = totalSales.toFixed(2) + ' ৳'; 
+            document.getElementById('total-due-report').innerText = totalDue.toFixed(2) + ' ৳';
+            document.getElementById('total-paid-report').innerText = totalPaid.toFixed(2) + ' ৳';
+            document.getElementById('total-invoices-report').innerText = totalInvoices;
+
+            
+            // ------------------------------------
+            // ৩. গ্রাহকভিত্তিক রিপোর্ট (Client-wise Report)
+            // ------------------------------------
+            
+            clientReportContainer.innerHTML = '';
+            clientReportPeriodName.innerText = periodName.replace(' সালের রিপোর্ট', '').replace('সম্পূর্ণ সময়ের রিপোর্ট', 'সম্পূর্ণ সময়');
+
+            if (yearSelect === "" && monthSelect === "") {
+                clientReportContainer.innerHTML = '<p style="color:#777;">মাস বা বছর সিলেক্ট করলে গ্রাহকভিত্তিক রিপোর্ট দেখাবে।</p>';
+                
+            } else if (filteredInvoices.length === 0) {
+                clientReportContainer.innerHTML = '<p style="color:#e74c3c;">এই মাস/বছরে কোনো ইনভয়েস পাওয়া যায়নি।</p>';
+                
+            } else {
+                // ৩.১. গ্রাহক অনুযায়ী ডেটা একত্র করা (Aggregation)
+                const clientData = {};
+                
+                filteredInvoices.forEach(inv => {
+                    const mobile = inv.customerMobile || inv.customerName; // Use mobile or name as unique key
+                    if (!clientData[mobile]) {
+                        clientData[mobile] = {
+                            name: inv.customerName,
+                            mobile: inv.customerMobile,
+                            totalPurchase: 0,
+                            totalPaid: 0,
+                            totalDue: 0,
+                            totalInvoices: 0
+                        };
+                    }
+                    
+                    clientData[mobile].totalPurchase += parseFloat(inv.total);
+                    clientData[mobile].totalPaid += parseFloat(inv.paid);
+                    clientData[mobile].totalDue += parseFloat(inv.due);
+                    clientData[mobile].totalInvoices += 1;
+                });
+
+                // ৩.২. টেবিল তৈরি করে UI-তে প্রদর্শন করা
+                let html = '<div style="overflow-x: auto;"><table style="width:100%; min-width: 550px; border-collapse: collapse;">';
+                html += `
+                    <thead>
+                        <tr style="background-color:#2980B9; color: white;">
+                            <th style="padding: 10px 8px; border: 1px solid #ddd; text-align: left; font-size: 0.9rem;">গ্রাহক নাম/মোবাইল</th>
+                            <th style="padding: 10px 8px; border: 1px solid #ddd; text-align: right; font-size: 0.9rem;">মোট ক্রয়</th>
+                            <th style="padding: 10px 8px; border: 1px solid #ddd; text-align: right; font-size: 0.9rem;">জমা</th>
+                            <th style="padding: 10px 8px; border: 1px solid #ddd; text-align: right; font-size: 0.9rem;">বকেয়া</th>
+                            <th style="padding: 10px 8px; border: 1px solid #ddd; text-align: center; font-size: 0.9rem;">বিল</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                `;
+                
+                const sortedClientData = Object.values(clientData).sort((a, b) => b.totalPurchase - a.totalPurchase);
+
+                sortedClientData.forEach(client => {
+                    html += `
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd;">
+                                <span style="font-weight: 600;">${client.name}</span>
+                                <br><span style="font-size: 0.75rem; color: #777;">${client.mobile || 'N/A'}</span>
+                            </td>
+                            <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${client.totalPurchase.toFixed(2)}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${client.totalPaid.toFixed(2)}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; text-align: right; color: ${client.totalDue > 0 ? 'var(--danger)' : '#000'}">
+                                ${client.totalDue.toFixed(2)}
+                            </td>
+                            <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${client.totalInvoices}</td>
+                        </tr>
+                    `;
+                });
+                
+                html += '</tbody></table></div>';
+                clientReportContainer.innerHTML = html;
+            }
+
+
+            // --- ৪. শীর্ষ গ্রাহক (সর্বমোট বকেয়া) ---
+            const topCustList = document.getElementById('top-customers-list');
+            topCustList.innerHTML = '';
+            
+            // বকেয়া অনুযায়ী সর্ট করা
+            const sortedCustomers = db.customers
+                .sort((a, b) => (b.totalDue || 0) - (a.totalDue || 0))
+                .slice(0, 5); 
+
+            sortedCustomers.forEach(cust => {
+                topCustList.innerHTML += `
+                    <li style="padding:8px 5px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items: center;">
+                        <div style="display: block;">
+                            <span style="font-weight: 500;">${cust.name}</span>
+                            <span style="font-size: 0.75rem; color: #777; display: block;">মোবাইল: ${cust.mobile}</span>
+                        </div>
+                        <div style="text-align: right;">
+                            <span style="font-weight: bold; color: var(--danger); margin-right: 10px;">বকেয়া: ${cust.totalDue}</span>
+                            <button class="btn-sm btn-danger" onclick='deleteCustomer("${cust.mobile}")'>
+                               <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </li>
+                `;
+            });
+        }
+        
+        // --- ডেটা এক্সপোর্ট (ব্যাকআপ) ---
+        function exportBackupData() {
+            const backupData = {
+                app_version: "1.0.0",
+                backup_created_at: new Date().toISOString(),
+                all_items: {
+                    invoices: db.invoices,
+                    customers: db.customers,
+                    reports: db.reports 
+                },
+                deleted_items: { 
+                    invoices: [],
+                    customers: []
+                },
+                settings: {},
+                flags: {}
+            };
+
+            const jsonString = JSON.stringify(backupData, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'joba_studio_backup_data.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            alert('ডেটা ব্যাকআপ সফলভাবে ডাউনলোড হয়েছে: joba_studio_backup_data.json');
+        }
+
+        // --- ডেটা ইমপোর্ট (রিস্টোর) ---
+        function importBackupData() {
+            const fileInput = document.getElementById('restoreFile');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('দয়া করে একটি "backup_data.json" ফাইল সিলেক্ট করুন।');
+                return;
+            }
+
+            if (!confirm('আপনি কি নিশ্চিত? রিস্টোর করলে বর্তমান সমস্ত ডেটা মুছে যাবে এবং আপলোড করা ডেটা দ্বারা প্রতিস্থাপিত হবে।')) {
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const backupData = JSON.parse(event.target.result);
+
+                    if (!backupData.all_items || !backupData.all_items.invoices || !backupData.all_items.customers) {
+                        alert('আপলোড করা ফাইলের গঠন সঠিক নয়। রিস্টোর সম্ভব না।');
+                        return;
+                    }
+
+                    db.invoices = backupData.all_items.invoices;
+                    db.customers = backupData.all_items.customers;
+                    db.reports = backupData.all_items.reports || {}; 
+                    
+                    saveToLocalStorage();
+                    
+                    alert('ডেটা সফলভাবে রিস্টোর করা হয়েছে! অ্যাপটি নতুন ডেটা সহ রিলোড হচ্ছে।');
+                    location.reload(); 
+                    
+                } catch (e) {
+                    console.error(e);
+                    alert('JSON ফাইলটি লোড বা পার্স করা যায়নি। ফাইলটি নষ্ট হতে পারে।');
+                }
+            };
+            
+            reader.readAsText(file);
+        }
+
+        // --- হেল্পার ---
+        function saveToLocalStorage() {
+            /* Keys changed to 'joba_' */
+            localStorage.setItem('joba_invoices', JSON.stringify(db.invoices));
+            localStorage.setItem('joba_customers', JSON.stringify(db.customers));
+            localStorage.setItem('joba_reports', JSON.stringify(db.reports)); 
+        }
+    </script>
+</body>
+</html>
