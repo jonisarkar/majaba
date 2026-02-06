@@ -1621,7 +1621,7 @@
                     if (!yearSelect || !monthSelect) return;
 
                     const currentYear = new Date().getFullYear();
-                    yearSelect.innerHTML = '';
+                    yearSelect.innerHTML = '<option value="">সম্পূর্ণ সময়</option>';
                     for (let i = currentYear; i >= currentYear - 5; i--) {
                         const opt = document.createElement('option');
                         opt.value = i;
@@ -1632,7 +1632,7 @@
                     monthSelect.innerHTML = '';
                     MONTHS.forEach((m, i) => {
                         const opt = document.createElement('option');
-                        opt.value = i;
+                        opt.value = i === 0 ? '' : String(i).padStart(2, '0');
                         opt.innerText = m;
                         monthSelect.appendChild(opt);
                     });
