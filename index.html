@@ -1153,6 +1153,18 @@
                                 <label data-t="date">তারিখ থেকে</label>
                                 <input type="date" id="filter-date-from" onchange="renderInvoiceList()">
                             </div>
+                            <div class="form-group">
+                                <label>তারিখ পর্যন্ত</label>
+                                <input type="date" id="filter-date-to" onchange="renderInvoiceList()">
+                            </div>
+                            <div class="form-group">
+                                <label>স্ট্যাটাস</label>
+                                <select id="filter-status" onchange="renderInvoiceList()">
+                                    <option value="all">সবগুলো</option>
+                                    <option value="paid">পরিশোধিত</option>
+                                    <option value="due">বকেয়া</option>
+                                </select>
+                            </div>
                         </div>
                         <div id="invoice-list-container" class="list-container"></div>
                     </div>
@@ -2159,7 +2171,7 @@
                         db.invoices.unshift(inv);
                         // For new invoices, we use the rollover logic if prevDue > 0
                         updateCustomerEntry(inv, inv.due, true);
-                        updateReportsLogic(inv.date, inv.itemsTotal, inv.paid, inv.due, true);
+                        updateReportsLogic(inv.date, inv.itemsTotal, inv.paid, inv.due, true, inv.prevDue);
                     }
 
                     function updateExistingInvoice(newInv) {
@@ -2168,14 +2180,14 @@
 
                         const oldInv = db.invoices[index];
                         // First reverse old invoice effects
-                        updateReportsLogic(oldInv.date, oldInv.itemsTotal || oldInv.total, oldInv.paid, oldInv.due, false);
+                        updateReportsLogic(oldInv.date, oldInv.itemsTotal || oldInv.total, oldInv.paid, oldInv.due, false, oldInv.prevDue);
                         // To reverse a rollover: add back the prevDue and subtract the due
                         updateCustomerEntry(oldInv, (oldInv.prevDue || 0) - oldInv.due, false);
 
                         db.invoices[index] = newInv;
                         // Then apply new invoice effects
                         updateCustomerEntry(newInv, newInv.due, true);
-                        updateReportsLogic(newInv.date, newInv.itemsTotal, newInv.paid, newInv.due, true);
+                        updateReportsLogic(newInv.date, newInv.itemsTotal, newInv.paid, newInv.due, true, newInv.prevDue);
                     }
 
                     function updateCustomerEntry(inv, dueDiff, isRollover = false, oldPrevDue = 0) {
@@ -2218,7 +2230,7 @@
                         }
                     }
 
-                    function updateReportsLogic(dateStr, total, paid, due, isAdd) {
+                    function updateReportsLogic(dateStr, total, paid, due, isAdd, prevDue = 0) {
                         const year = dateStr.slice(0, 4);
                         const month = dateStr.slice(5, 7);
                         if (!db.reports[year]) db.reports[year] = {};
@@ -2226,7 +2238,7 @@
                             db.reports[year][month] = { totalSales: 0, totalDue: 0, totalPaid: 0, totalInvoices: 0 };
                         }
                         const mult = isAdd ? 1 : -1;
-                        const netDueChange = (due - (inv.prevDue || 0));
+                        const netDueChange = (due - prevDue);
                         db.reports[year][month].totalSales += total * mult;
                         db.reports[year][month].totalDue += netDueChange * mult;
                         db.reports[year][month].totalPaid += paid * mult;
@@ -2268,10 +2280,10 @@
 
                     // --- UI Rendering ---
                     function renderInvoiceList() {
-                        const query = document.getElementById('invoiceSearch').value.toLowerCase();
-                        const dateFrom = document.getElementById('filter-date-from').value;
-                        const dateTo = document.getElementById('filter-date-to').value;
-                        const status = document.getElementById('filter-status').value;
+                        const query = (document.getElementById('invoiceSearch')?.value || '').toLowerCase();
+                        const dateFrom = document.getElementById('filter-date-from')?.value || '';
+                        const dateTo = document.getElementById('filter-date-to')?.value || '';
+                        const status = document.getElementById('filter-status')?.value || 'all';
                         const container = document.getElementById('invoice-list-container');
                         const t = TRANSLATIONS[state.lang];
 
